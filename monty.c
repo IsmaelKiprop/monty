@@ -1,113 +1,83 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "monty.h"
+stack_t *head = NULL;
 
 /**
- * push - Pushes an element onto the stack.
- * @stack: Pointer to the top of the stack.
- * @value: Value to push.
+ * main - entry point
+ * @argc: arguments count
+ * @argv: list of arguments
+ * Return: always 0
  */
-void push(stack_t **stack, int value)
-{
-    stack_t *new_node = malloc(sizeof(stack_t));
-    if (new_node == NULL)
-    {
-        fprintf(stderr, "Error: malloc failed\n");
-        exit(EXIT_FAILURE);
-    }
-
-    new_node->n = value;
-    new_node->next = *stack;
-    *stack = new_node;
-}
-
-/**
- * pall - Print all the values on the stack.
- * @stack: Pointer to the top of the stack.
- */
-void pall(stack_t *stack)
-{
-    while (stack != NULL)
-    {
-        printf("%d\n", stack->n);
-        stack = stack->next;
-    }
-}
-
-/**
- * parse_and_execute - Parse and execute Monty bytecodes from a file.
- * @file: Pointer to the Monty bytecodes file.
- * @stack: Pointer to the top of the stack.
- */
-void parse_and_execute(FILE *file, stack_t **stack)
-{
-    char opcode[128];
-    int value;
-    unsigned int line_number = 0;
-
-    while (fgets(opcode, sizeof(opcode), file) != NULL)
-    {
-        line_number++;
-        // Remove trailing newline character if present
-        size_t opcode_len = strlen(opcode);
-        if (opcode_len > 0 && opcode[opcode_len - 1] == '\n')
-            opcode[opcode_len - 1] = '\0';
-
-        // Tokenize and process opcodes here
-        if (sscanf(opcode, "push %d", &value) == 1)
-        {
-            push(stack, value);
-        }
-        else if (strcmp(opcode, "pall") == 0)
-        {
-            pall(*stack);
-        }
-        // Add more opcode handling here based on your project's requirements
-        else
-        {
-            fprintf(stderr, "L%d: unknown instruction %s\n", line_number, opcode);
-            exit(EXIT_FAILURE);
-        }
-    }
-}
-
-/**
- * free_stack - Free memory used by the stack.
- * @stack: Pointer to the top of the stack.
- */
-void free_stack(stack_t *stack)
-{
-    while (stack != NULL)
-    {
-        stack_t *temp = stack;
-        stack = stack->next;
-        free(temp);
-    }
-}
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: monty file\n");
-        exit(EXIT_FAILURE);
-    }
+	if (argc != 2)
+	{
+		fprintf(stderr, "USAGE: monty file\n");
+		exit(EXIT_FAILURE);
+	}
+	open_file(argv[1]);
+	free_nodes();
+	return (0);
+}
 
-    FILE *file = fopen(argv[1], "r");
-    if (file == NULL)
-    {
-        fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
-        exit(EXIT_FAILURE);
-    }
+/**
+ * create_node - Creates node.
+ * @n: Number to go inside node.
+ * Return: Upon sucess a pointer to node. Otherwise NULL.
+ */
+stack_t *create_node(int n)
+{
+	stack_t *node;
 
-    stack_t *stack = NULL;
+	node = malloc(sizeof(stack_t));
+	if (node == NULL)
+		err(4);
+	node->next = NULL;
+	node->prev = NULL;
+	node->n = n;
+	return (node);
+}
 
-    // Parse and execute opcodes from the file
-    parse_and_execute(file, &stack);
+/**
+ * free_nodes - Frees nodes in stack.
+ */
+void free_nodes(void)
+{
+	stack_t *tmp;
 
-    fclose(file);
-    free_stack(stack);
+	if (head == NULL)
+		return;
 
-    return 0;
+	while (head != NULL)
+	{
+		tmp = head;
+		head = head->next;
+		free(tmp);
+	}
+}
+
+
+/**
+ * add_to_queue - Adds node to queue.
+ * @new_node: Pointer to new node.
+ * @ln: line number of opcode.
+ */
+void add_to_queue(stack_t **new_node, __attribute__((unused))unsigned int ln)
+{
+	stack_t *tmp;
+
+	if (new_node == NULL || *new_node == NULL)
+		exit(EXIT_FAILURE);
+	if (head == NULL)
+	{
+		head = *new_node;
+		return;
+	}
+	tmp = head;
+	while (tmp->next != NULL)
+		tmp = tmp->next;
+
+	tmp->next = *new_node;
+	(*new_node)->prev = tmp;
+
 }
