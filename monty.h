@@ -10,10 +10,10 @@
 #include <stdarg.h>
 
 /**
- * struct stack_s - doubly linked list representation of a stack (or queue)
- * @n: integer
- * @prev: points to previous element of the stack (or queue)
- * @next: points to next element of the stack (or queue)
+ * struct stack_s - doubly linked list representation of stack (or queue)
+ * @n: int
+ * @prev: point to previous element of stack (or queue)
+ * @next: point to next element of stack (or queue)
  *
  * Description: doubly linked list node structure
  * for stack, queues, LIFO, FIFO
